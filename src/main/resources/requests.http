@@ -1,0 +1,7 @@
+GET http://localhost/number/random
+Content-Type: text/plain
+
+###
+
+GET http://localhost/number/next
+Content-Type: text/plain
