@@ -54,6 +54,19 @@ class NumbersControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("text/plain;charset=UTF-8"))
                     .andExpect(content().string("А000АА 116 RUS"));
+
+            when(numbersService.getNextNumber()).thenReturn(CarNumber.builder()
+                    .id(2L)
+                    .regNumber(1)
+                    .series("ААА")
+                    .regionCode(116)
+                    .build());
+
+            mockMvc.perform(get("/next"))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("text/plain;charset=UTF-8"))
+                    .andExpect(content().string("А001АА 116 RUS"));
         }
     }
 
@@ -67,6 +80,19 @@ class NumbersControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("text/plain;charset=UTF-8"))
                     .andExpect(content().string("В573ХМ 116 RUS"));
+
+            when(numbersService.getRandomNumber()).thenReturn(CarNumber.builder()
+                    .id(3L)
+                    .regNumber(492)
+                    .series("ХОК")
+                    .regionCode(116)
+                    .build());
+
+            mockMvc.perform(get("/random"))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("text/plain;charset=UTF-8"))
+                    .andExpect(content().string("Х492ОК 116 RUS"));
         }
     }
 }

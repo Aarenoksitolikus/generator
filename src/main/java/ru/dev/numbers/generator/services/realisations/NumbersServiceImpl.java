@@ -2,7 +2,6 @@ package ru.dev.numbers.generator.services.realisations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.dev.numbers.generator.exceptions.NumberException;

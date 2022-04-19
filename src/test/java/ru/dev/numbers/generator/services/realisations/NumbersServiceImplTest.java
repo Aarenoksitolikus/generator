@@ -1,7 +1,6 @@
 package ru.dev.numbers.generator.services.realisations;
 
 import org.junit.jupiter.api.*;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -10,8 +9,6 @@ import ru.dev.numbers.generator.repositories.NumbersRepository;
 import ru.dev.numbers.generator.services.templates.NumbersService;
 
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -32,26 +29,35 @@ class NumbersServiceImplTest {
     @MockBean
     private NumbersRepository numbersRepository;
 
-    private final CarNumber FIRST_NUMBER = CarNumber.builder()
+    private CarNumber currentNumber = CarNumber.builder()
             .id(1L)
             .regionCode(116)
             .regNumber(0)
             .series("ААА")
             .build();
 
-    private CarNumber SECOND_NUMBER;
+    private final CarNumber FIRST_NUMBER = CarNumber.builder()
+            .id(2L)
+            .regionCode(116)
+            .regNumber(1)
+            .series("ААА")
+            .build();
+    private final CarNumber SECOND_NUMBER = CarNumber.builder()
+            .id(3L)
+            .regionCode(116)
+            .regNumber(2)
+            .series("ААА")
+            .build();
+
+    CarNumber incrementCarNumber() {
+        currentNumber.setRegNumber(currentNumber.getRegNumber() + 1);
+        currentNumber.setId(currentNumber.getId() + 1);
+        return currentNumber;
+    }
 
     @BeforeEach
     void setUp() {
-        SECOND_NUMBER = CarNumber.builder()
-                .id(2L)
-                .regionCode(116)
-                .regNumber(1)
-                .series("ААА")
-                .build();
-        when(numbersRepository.findByRegNumberAndSeriesAndRegionCode(0, "ААА", 116))
-                .thenReturn(Optional.empty());
-        when(numbersRepository.save(any())).thenReturn(SECOND_NUMBER);
+        when(numbersRepository.save(any())).thenReturn(incrementCarNumber());
     }
 
     @Nested
@@ -69,7 +75,25 @@ class NumbersServiceImplTest {
 
         @Test
         void returns_correct_number_if_no_one_number_exist() {
-            assertThat(numbersService.getNextNumber(), is(equalTo(SECOND_NUMBER)));
+            when(numbersRepository.findByRegNumberAndSeriesAndRegionCode(0, "ААА", 116))
+                    .thenReturn(Optional.empty());
+            var a = numbersService.getNextNumber();
+            assertThat(a.getId(), is(equalTo(FIRST_NUMBER.getId())));
+            assertThat(a.getRegNumber(), is(equalTo(FIRST_NUMBER.getRegNumber())));
+            assertThat(a.getSeries(), is(equalTo(FIRST_NUMBER.getSeries())));
+            assertThat(a.getRegionCode(), is(equalTo(FIRST_NUMBER.getRegionCode())));
+        }
+
+        @Test
+        void returns_correct_number_if_there_are_some_numbers() {
+            var b = numbersService.getNextNumber();
+            System.out.println(b);
+            var a = numbersService.getNextNumber();
+            System.out.println(a);
+            assertThat(a.getId(), is(equalTo(FIRST_NUMBER.getId())));
+            assertThat(a.getRegNumber(), is(equalTo(FIRST_NUMBER.getRegNumber())));
+            assertThat(a.getSeries(), is(equalTo(FIRST_NUMBER.getSeries())));
+            assertThat(a.getRegionCode(), is(equalTo(FIRST_NUMBER.getRegionCode())));
         }
     }
 }
