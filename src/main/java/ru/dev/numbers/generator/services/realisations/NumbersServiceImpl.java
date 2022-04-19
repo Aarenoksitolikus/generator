@@ -127,7 +127,7 @@ public class NumbersServiceImpl implements NumbersService {
                                 first = array[j + 1];
                                 break;
                             } else {
-                                throw new NumberException("Cannot increment series");
+                                throw new NumberException("Cannot increment car number");
                             }
                         }
                     }

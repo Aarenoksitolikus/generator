@@ -27,12 +27,13 @@ public class CarNumber {
     @Override
     public String toString() {
         String regNumber;
+        if (this.regNumber < 0 || this.regNumber > 999) {
+            throw new NumberException("Incorrect registration number");
+        }
         if (this.regNumber < 10) {
             regNumber = "00" + this.regNumber;
         } else if (this.regNumber < 100) {
             regNumber = "0" + this.regNumber;
-        } else if (this.regNumber > 999) {
-            throw new NumberException("fuck you");
         } else {
             regNumber = "" + this.regNumber;
         }
