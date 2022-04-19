@@ -3,13 +3,11 @@ package ru.dev.numbers.generator.services.realisations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.dev.numbers.generator.exceptions.NumberException;
 import ru.dev.numbers.generator.models.CarNumber;
 import ru.dev.numbers.generator.repositories.NumbersRepository;
 import ru.dev.numbers.generator.services.templates.NumbersService;
-
-import java.util.Arrays;
-import java.util.Random;
 
 @Service
 public class NumbersServiceImpl implements NumbersService {
@@ -19,15 +17,15 @@ public class NumbersServiceImpl implements NumbersService {
 
     private CarNumber lastOrdinalNumber;
 
-    @Value("default.region.code")
-    private String defaultRegionCode;
+    @Value("${default.region.code}")
+    private int defaultRegionCode;
 
 
     public NumbersServiceImpl() {
         this.lastOrdinalNumber = CarNumber.builder()
                 .regionCode(116)
-                .regNumber(998)
-                .series("АХХ")
+                .regNumber(0)
+                .series("ААА")
                 .build();
         this.array = new char[]{'А', 'B', 'E', 'К', 'М', 'Н', 'О', 'Р', 'C', 'Т', 'У', 'Х'};
     }
@@ -35,13 +33,44 @@ public class NumbersServiceImpl implements NumbersService {
     private final char[] array;
 
     @Override
+    @Transactional
     public CarNumber getRandomNumber() {
-        return getRandom(Integer.parseInt(defaultRegionCode));
+        var current = getRandom(defaultRegionCode);
+        var check = numbersRepository.findByRegNumberAndSeriesAndRegionCode(
+                current.getRegNumber(),
+                current.getSeries(),
+                current.getRegionCode()
+        );
+        while (check.isPresent()) {
+            current = getRandom(defaultRegionCode);
+            check = numbersRepository.findByRegNumberAndSeriesAndRegionCode(
+                    current.getRegNumber(),
+                    current.getSeries(),
+                    current.getRegionCode()
+            );
+        }
+        return numbersRepository.save(current);
     }
 
     @Override
+    @Transactional
     public CarNumber getNextNumber() {
-        var result = getNext(lastOrdinalNumber);
+        CarNumber result;
+        var current = getNext(lastOrdinalNumber);
+        var check = numbersRepository.findByRegNumberAndSeriesAndRegionCode(
+                current.getRegNumber(),
+                current.getSeries(),
+                current.getRegionCode()
+        );
+        while (check.isPresent()) {
+            current = getNext(current);
+            check = numbersRepository.findByRegNumberAndSeriesAndRegionCode(
+                    current.getRegNumber(),
+                    current.getSeries(),
+                    current.getRegionCode()
+            );
+        }
+        result = numbersRepository.save(current);
         lastOrdinalNumber = result;
         return result;
     }
