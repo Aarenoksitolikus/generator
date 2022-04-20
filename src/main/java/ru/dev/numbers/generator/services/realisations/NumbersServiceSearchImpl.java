@@ -1,4 +1,4 @@
-package ru.dev.numbers.generator.services.templates;
+package ru.dev.numbers.generator.services.realisations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.dev.numbers.generator.exceptions.NumberException;
 import ru.dev.numbers.generator.models.CarNumber;
 import ru.dev.numbers.generator.repositories.NumbersRepository;
+import ru.dev.numbers.generator.services.templates.NumbersService;
 import ru.dev.numbers.generator.utils.CarNumberBuilder;
 
 @Service
@@ -71,10 +72,6 @@ public class NumbersServiceSearchImpl implements NumbersService {
         var current = numbersRepository.findNextFree(lastOrdinalNumber.getRegNumber(),
                 lastOrdinalNumber.getSeries(),
                 lastOrdinalNumber.getRegionCode());
-        System.out.println(lastOrdinalNumber.getRegNumber());
-        System.out.println(lastOrdinalNumber.getSeries());
-        System.out.println(lastOrdinalNumber.getRegionCode());
-        System.out.println(current.isPresent());
         if (current.isPresent()) {
             result = current.get();
             result.setIsFree(false);
