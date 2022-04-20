@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @DisplayNameGeneration(value = DisplayNameGenerator.ReplaceUnderscores.class)
 @DisplayName("NumbersService is working when:")
-class NumbersServiceImplTest {
+class NumbersServiceInsertImplTest {
 
     @Autowired
     private NumbersService numbersService;
