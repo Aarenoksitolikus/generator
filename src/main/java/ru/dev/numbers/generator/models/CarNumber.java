@@ -23,6 +23,8 @@ public class CarNumber {
     private String series;
     @Column(nullable = false, length = 3)
     private int regionCode;
+    @Column(nullable = false)
+    private Boolean isFree;
 
     @Override
     public String toString() {

@@ -16,9 +16,13 @@ public class NumbersServiceImpl implements NumbersService {
     private NumbersRepository numbersRepository;
 
     private CarNumber lastOrdinalNumber;
+    private Long amountOfNumbers;
 
     @Value("${default.region.code}")
     private int defaultRegionCode;
+
+    @Value("${default.max.numbers}")
+    private long defaultMaxAmountOfNumbers;
 
 
     public NumbersServiceImpl() {
@@ -27,6 +31,7 @@ public class NumbersServiceImpl implements NumbersService {
                 .regNumber(0)
                 .series("ААА")
                 .build();
+        this.amountOfNumbers = 0L;
         this.array = new char[]{'А', 'B', 'E', 'К', 'М', 'Н', 'О', 'Р', 'C', 'Т', 'У', 'Х'};
     }
 
@@ -35,12 +40,18 @@ public class NumbersServiceImpl implements NumbersService {
     @Override
     @Transactional
     public CarNumber getRandomNumber() {
+        amountOfNumbers = numbersRepository.countNumbers();
+        if (amountOfNumbers == defaultMaxAmountOfNumbers) {
+            throw new NumberException("Available car numbers are over");
+        }
+
         var current = getRandom(defaultRegionCode);
         var check = numbersRepository.findByRegNumberAndSeriesAndRegionCode(
                 current.getRegNumber(),
                 current.getSeries(),
                 current.getRegionCode()
         );
+
         while (check.isPresent()) {
             current = getRandom(defaultRegionCode);
             check = numbersRepository.findByRegNumberAndSeriesAndRegionCode(
@@ -49,12 +60,18 @@ public class NumbersServiceImpl implements NumbersService {
                     current.getRegionCode()
             );
         }
+        current.setIsFree(false);
         return numbersRepository.save(current);
     }
 
     @Override
     @Transactional
     public CarNumber getNextNumber() {
+        amountOfNumbers = numbersRepository.countNumbers();
+        if (amountOfNumbers == defaultMaxAmountOfNumbers) {
+            throw new NumberException("Available car numbers are over");
+        }
+
         CarNumber result;
         var current = getNext(lastOrdinalNumber);
         var check = numbersRepository.findByRegNumberAndSeriesAndRegionCode(
@@ -70,6 +87,7 @@ public class NumbersServiceImpl implements NumbersService {
                     current.getRegionCode()
             );
         }
+        current.setIsFree(false);
         result = numbersRepository.save(current);
         lastOrdinalNumber = result;
         return result;
@@ -86,6 +104,7 @@ public class NumbersServiceImpl implements NumbersService {
             series = incrementSeries(series);
             regNumber = 0;
         }
+
         return CarNumber.builder()
                 .series(series)
                 .regionCode(regionCode)
@@ -99,6 +118,7 @@ public class NumbersServiceImpl implements NumbersService {
             int index = (int) (Math.random() * array.length);
             series.append(array[index]);
         }
+
         int regNumber = (int) (Math.random() * 1000);
         return CarNumber.builder()
                 .regNumber(regNumber)
@@ -119,6 +139,7 @@ public class NumbersServiceImpl implements NumbersService {
                         middle = array[i + 1];
                         break;
                     }
+
                     middle = 'A';
                     for (int j = 0; j < array.length; j++) {
                         if (first == array[j]) {
@@ -141,9 +162,11 @@ public class NumbersServiceImpl implements NumbersService {
                 }
             }
         }
+
         letters[0] = first;
         letters[1] = middle;
         letters[2] = last;
+
         return String.valueOf(letters);
     }
 }
